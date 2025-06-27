@@ -81,7 +81,7 @@ const handleAudioUpload = async (audioBlob, setEmotionData, setTrends, setEmotio
   setLoading(true)
 
   try {
-    const response = await fetch("http://localhost:8000/api/audio/upload", {
+    const response = await fetch("https://emosense-a-realtime-multilingual-emotion.onrender.com/api/audio/upload", {
       method: "POST",
       body: formData,
     })
