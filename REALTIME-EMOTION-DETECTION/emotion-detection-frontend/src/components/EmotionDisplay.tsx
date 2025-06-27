@@ -9,6 +9,7 @@ interface EmotionData {
   }>
   original_transcription?: string
   translated_text?: string
+  error?: string
 }
 
 interface EmotionDisplayProps {
@@ -27,7 +28,13 @@ export default function EmotionDisplay({ emotionData, isAnalyzing }: EmotionDisp
     }
   }, [emotionData, isAnalyzing])
 
-  if (!emotionData) return null
+  if (!emotionData || !emotionData.emotions || !Array.isArray(emotionData.emotions) || emotionData.emotions.length === 0) {
+  return (
+    <div className="mt-8 text-center text-red-400">
+      {emotionData?.error ? emotionData.error : "No emotion data available."}
+    </div>
+  )
+ }
 
   const primaryEmotion = emotionData.emotions[0]
   const getEmotionEmoji = (emotion: string) => {
@@ -77,18 +84,18 @@ export default function EmotionDisplay({ emotionData, isAnalyzing }: EmotionDisp
       className={`mt-8 transition-all duration-1000 ${showResults ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
     >
       {/* Primary Emotion Display */}
-      <div className="text-center mb-8">
+      <div className="mb-8 text-center">
         <div
           className={`inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br ${getEmotionColor(primaryEmotion.label)} mb-4 animate-pulse`}
         >
           <span className="text-6xl">{getEmotionEmoji(primaryEmotion.label)}</span>
         </div>
-        <h2 className="text-4xl font-bold text-white mb-2 capitalize">{primaryEmotion.label}</h2>
+        <h2 className="mb-2 text-4xl font-bold text-white capitalize">{primaryEmotion.label}</h2>
         <p className="text-xl text-gray-300">{(primaryEmotion.score * 100).toFixed(1)}% confidence</p>
       </div>
 
       {/* All Emotions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
         {emotionData.emotions.slice(0, 3).map((emotion, index) => (
           <div
             key={emotion.label}
@@ -98,9 +105,9 @@ export default function EmotionDisplay({ emotionData, isAnalyzing }: EmotionDisp
             style={{ animationDelay: `${index * 200}ms` }}
           >
             <div className="text-center">
-              <div className="text-4xl mb-3">{getEmotionEmoji(emotion.label)}</div>
-              <h3 className="text-xl font-semibold text-white capitalize mb-2">{emotion.label}</h3>
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+              <div className="mb-3 text-4xl">{getEmotionEmoji(emotion.label)}</div>
+              <h3 className="mb-2 text-xl font-semibold text-white capitalize">{emotion.label}</h3>
+              <div className="w-full h-2 mb-2 bg-gray-700 rounded-full">
                 <div
                   className={`h-2 rounded-full bg-gradient-to-r ${getEmotionColor(emotion.label)} transition-all duration-1000`}
                   style={{ width: `${emotion.score * 100}%` }}
@@ -114,16 +121,16 @@ export default function EmotionDisplay({ emotionData, isAnalyzing }: EmotionDisp
 
       {/* Transcription and Translation */}
       {(emotionData.original_transcription || emotionData.translated_text) && (
-        <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+        <div className="p-6 border bg-black/30 backdrop-blur-sm rounded-2xl border-white/10">
+          <h3 className="flex items-center mb-4 text-xl font-semibold text-white">
             <span className="mr-2">🎤</span>
             Voice Analysis
           </h3>
 
           {emotionData.original_transcription && (
             <div className="mb-4">
-              <p className="text-sm text-gray-400 mb-1">Original Transcription:</p>
-              <p className="text-white bg-white/5 rounded-lg p-3 border border-white/10">
+              <p className="mb-1 text-sm text-gray-400">Original Transcription:</p>
+              <p className="p-3 text-white border rounded-lg bg-white/5 border-white/10">
                 "{emotionData.original_transcription}"
               </p>
             </div>
@@ -131,8 +138,8 @@ export default function EmotionDisplay({ emotionData, isAnalyzing }: EmotionDisp
 
           {emotionData.translated_text && emotionData.translated_text !== emotionData.original_transcription && (
             <div>
-              <p className="text-sm text-gray-400 mb-1">Translation:</p>
-              <p className="text-white bg-white/5 rounded-lg p-3 border border-white/10">
+              <p className="mb-1 text-sm text-gray-400">Translation:</p>
+              <p className="p-3 text-white border rounded-lg bg-white/5 border-white/10">
                 "{emotionData.translated_text}"
               </p>
             </div>

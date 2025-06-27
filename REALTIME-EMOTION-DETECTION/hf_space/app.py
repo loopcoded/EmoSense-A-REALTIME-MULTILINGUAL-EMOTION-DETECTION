@@ -4,10 +4,12 @@ import transformers
 from flask_cors import CORS
 from deep_translator import GoogleTranslator
 import os
-import wave 
+import tempfile
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app, origins=["*"])  # Configure CORS for your domains
+
+# Load model on startup
 try:
     classifier = transformers.pipeline(
         task="text-classification",
@@ -45,7 +47,11 @@ def translate_text(text):
         return translated
     except Exception as e:
         print(f"⚠️ Translation failed: {e}")
-    return text
+        return text
+
+@app.route("/", methods=["GET"])
+def health_check():
+    return jsonify({"status": "Emotion Detection API is running"}), 200
 
 @app.route("/predict", methods=["POST"])
 def predict_emotion():
@@ -56,48 +62,49 @@ def predict_emotion():
     audio_file = request.files["audio"]
     print(f"✅ Received audio file: {audio_file.filename}")
 
-    file_path = "uploaded_audio.wav"
-
-    try:
+    # Use temporary file to avoid conflicts
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_file:
+        file_path = temp_file.name
         audio_file.save(file_path)
         print(f"📁 Audio file saved at: {file_path}")
-    except Exception as e:
-        return jsonify({"error": f"Could not save audio file: {e}"}), 500
 
-    # Step 1: Convert audio to text
-    transcribed_text = transcribe_audio(file_path)
-
-    if not transcribed_text:
-        return jsonify({"error": "Could not transcribe the audio"}), 500
-
-    # Step 2: Translate text if needed
-    translated_text = translate_text(transcribed_text)
-
-    if classifier is None:
-        return jsonify({"error": "Emotion classifier not available"}), 500
-
-    # Step 3: Perform emotion classification
     try:
+        # Step 1: Convert audio to text
+        transcribed_text = transcribe_audio(file_path)
+
+        if not transcribed_text:
+            return jsonify({"error": "Could not transcribe the audio"}), 500
+
+        # Step 2: Translate text if needed
+        translated_text = translate_text(transcribed_text)
+
+        if classifier is None:
+            return jsonify({"error": "Emotion classifier not available"}), 500
+
+        # Step 3: Perform emotion classification
         predictions = classifier(translated_text)
         emotions = [{"label": p["label"], "score": p["score"]} for p in predictions[0]]
 
         print("📊 Emotion analysis complete.")
+
+        return jsonify({
+            "original_transcription": transcribed_text,
+            "translated_text": translated_text,
+            "emotions": emotions
+        })
+
     except Exception as e:
         print(f"❌ Emotion classification error: {e}")
         return jsonify({"error": "Failed to analyze emotions"}), 500
 
-    # Cleanup: Delete saved audio file after processing
-    try:
-        os.remove(file_path)
-        print(f"🗑️ Deleted audio file: {file_path}")
-    except Exception as e:
-        print(f"⚠️ Error deleting file: {e}")
-
-    return jsonify({
-        "original_transcription": transcribed_text,
-        "translated_text": translated_text,
-        "emotions": emotions
-    })
+    finally:
+        # Cleanup: Delete temporary file
+        try:
+            os.remove(file_path)
+            print(f"🗑️ Deleted audio file: {file_path}")
+        except Exception as e:
+            print(f"⚠️ Error deleting file: {e}")
 
 if __name__ == "__main__":
-    app.run(debug=False, port=5000,use_reloader=False)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port, debug=False)
