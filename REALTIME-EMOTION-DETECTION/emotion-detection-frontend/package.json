@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.tsx",
   "scripts": {
-    "start": "react-scripts start"
+    "start": "react-scripts start",
+    "run": "react-scripts start",
+    "build": "react-scripts build"
   },
   "keywords": [],
   "author": "",
