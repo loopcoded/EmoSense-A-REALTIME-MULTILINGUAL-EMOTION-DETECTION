@@ -67,12 +67,12 @@ export default function Home() {
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-4">
+        <div className="mb-8 text-center">
+          <h1 className="mb-4 text-5xl font-bold text-transparent md:text-7xl bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text">
             EmoSense
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 font-light">Multilingual Emotion Detection</p>
-          <p className="text-sm md:text-base text-gray-400 mt-2">Real-time voice signal analysis</p>
+          <p className="text-xl font-light text-gray-300 md:text-2xl">Multilingual Real-time Emotion Detection through voice signal analysis </p>
+          <p className="mt-2 text-sm text-gray-400 md:text-base"> Made by Sejal Sinha</p>
         </div>
 
         {/* Main Interface */}
@@ -101,11 +101,11 @@ export default function Home() {
                 <button
                   onClick={handleAnalyzeEmotion}
                   disabled={loading}
-                  className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="px-8 py-4 font-semibold text-white transition-all duration-300 transform shadow-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
                       <span>Analyzing...</span>
                     </div>
                   ) : (
@@ -115,7 +115,7 @@ export default function Home() {
 
                 <button
                   onClick={resetSession}
-                  className="px-6 py-4 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-2xl transition-all duration-300 transform hover:scale-105"
+                  className="px-6 py-4 font-semibold text-white transition-all duration-300 transform bg-gray-700 hover:bg-gray-600 rounded-2xl hover:scale-105"
                 >
                   Reset
                 </button>
@@ -127,7 +127,7 @@ export default function Home() {
           {emotionData && <EmotionDisplay emotionData={emotionData} isAnalyzing={isAnalyzing} />}
         </div>
       </div>
-      <footer className="absolute bottom-0 w-full text-center p-4 bg-gray-800 text-gray-400">
+      <footer className="absolute bottom-0 w-full p-4 text-center text-gray-400 bg-gray-800">
         <p className="text-sm">© 2025 EmoSense. All rights reserved.</p>
         <p className="text-xs">Built By Sejal Sinha</p> 
       </footer>
